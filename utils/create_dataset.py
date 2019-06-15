@@ -19,7 +19,7 @@ import datetime
 
 import numpy as np
 
-
+'''
 def read_sfmlearn(ego_path, flip):
     """
     Right-hand coordinate (following SfMLearn paper).
@@ -50,7 +50,7 @@ def read_gridflow(ego_path, flip):
             ego_dict[key] = grid_flow
     return ego_dict
 
-
+'''
 def read_vid_list(indir_list):
     vid_list, nb_image_list = [], []
     blacklist = {}
@@ -123,12 +123,14 @@ if __name__ == "__main__":
         for vid in shuffled_ids[int(nb_videos*st):int(nb_videos*(st+ratio))]:
             split_dict[vid] = sp
 
-    video_ids, frames, person_ids, trajectories, poses, splits, \
-        turn_mags, trans_mags, pids = [], [], [], [], [], [], [], [], []
-    start_dict, traj_dict, pose_dict = {}, {}, {}
+    video_ids, frames, person_ids, trajectories, splits,\
+        trans_mags, pids = [], [], [], [], [], [], []
+    #turn_mags, poses = [], []
+    start_dict, traj_dict= {}, {}
+    # pose_dict = {}
 
     total_frames = 0                  # Intialize the total number of frames across all video sequences.              
-    egomotion_dict = {}
+    #egomotion_dict = {}
     nb_trajs = 0
     nb_traj_list = [0 for _ in range(args.nb_splits)]
 
@@ -142,6 +144,7 @@ if __name__ == "__main__":
         with open(trajectory_path, "r") as f:
             trajectory_dict = json.load(f)
 
+        '''
         #sfm is the default ego type given in the author's github.
         #sfm: learing structure from motions. sfm defines 6 features [rx, ry, rz, vx, vy, vz]
         # for each frame. 
@@ -155,10 +158,10 @@ if __name__ == "__main__":
 
         #Sorted sfm 6 features in frame orders and collects only these features.
         lr_mag_list = [abs(v[1]) for k, v in sorted(egomotion_dict[video_id].items())]
-
+        '''
         start_dict[video_id] = {}
         traj_dict[video_id] = {}
-        pose_dict[video_id] = {}
+        # pose_dict[video_id] = {}
 
         # pid search
         pids = []
@@ -170,11 +173,11 @@ if __name__ == "__main__":
             if "traj_sm" not in info:
                 continue
             traj = info["traj_sm"]
-            pose = info["pose_sm"]
+            #pose = info["pose_sm"]
 
             if len(traj) < args.traj_length:
                 continue
-            front_cnt = sum([1 if ps[11][0] - ps[8][0] > 0 else 0 for ps in pose])
+            #front_cnt = sum([1 if ps[11][0] - ps[8][0] > 0 else 0 for ps in pose])
             pids.append(pid)
 
         pid_cnt = len(pids)
@@ -185,7 +188,7 @@ if __name__ == "__main__":
             info = trajectory_dict[pid]
             t_s = info["start"]
             traj = info["traj_sm"]
-            pose = info["pose_sm"]
+            #pose = info["pose_sm"]
             pid = int(pid)
 
             if t_s <= 2 or t_s + len(traj) >= nb_images - 1:
@@ -193,7 +196,7 @@ if __name__ == "__main__":
 
             start_dict[video_id][pid] = info["start"]
             traj_dict[video_id][pid] = info["traj_sm"]
-            pose_dict[video_id][pid] = info["pose_sm"]
+            #pose_dict[video_id][pid] = info["pose_sm"]
 
             def add_sample(split):
                 x_max = np.max([x[0] for x in traj[tidx+args.traj_length//2:tidx+args.traj_length]])
@@ -201,16 +204,16 @@ if __name__ == "__main__":
                 y_max = np.max([x[1] for x in traj[tidx+args.traj_length//2:tidx+args.traj_length]])
                 y_min = np.min([x[1] for x in traj[tidx+args.traj_length//2:tidx+args.traj_length]])
                 trans_mag = np.sqrt((x_max - x_min) ** 2 + (y_max - y_min) ** 2)
-                turn_mag = np.max(lr_mag_list[tidx + t_s - 1 + args.traj_length // 2:tidx + t_s - 1 + args.traj_length])
+                #turn_mag = np.max(lr_mag_list[tidx + t_s - 1 + args.traj_length // 2:tidx + t_s - 1 + args.traj_length])
 
                 frames.append(tidx + t_s)
                 person_ids.append(pid)
                 trajectories.append(traj[tidx:tidx+args.traj_length])
-                poses.append(pose[tidx:tidx+args.traj_length])
+                #poses.append(pose[tidx:tidx+args.traj_length])
                 splits.append(split)
                 video_ids.append(video_id)
 
-                turn_mags.append(turn_mag)
+                #turn_mags.append(turn_mag)
                 trans_mags.append(trans_mag)
 
             # Training set (split 0-4)
@@ -247,16 +250,16 @@ if __name__ == "__main__":
             "frames": np.array(frames),
             "person_ids": np.array(person_ids),
             "trajectories": np.array(trajectories),
-            "poses": np.array(poses),
+            #"poses": np.array(poses),
             "splits": splits,
-            "egomotion_dict": egomotion_dict,
-            "turn_mags": np.array(turn_mags),
+            #"egomotion_dict": egomotion_dict,
+            #"turn_mags": np.array(turn_mags),
             "trans_mags": np.array(trans_mags),
             "start_dict": start_dict,
             "traj_dict": traj_dict,
-            "pose_dict": pose_dict
+            #"pose_dict": pose_dict
         }, out_fn)
 
-        print(np.array(poses).shape)
+        #print(np.array(poses).shape)
         print("Written to {}".format(out_fn))
     print("Completed. Elapsed time: {} (s)".format(time.time()-start))

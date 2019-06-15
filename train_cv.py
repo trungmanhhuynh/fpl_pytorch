@@ -69,8 +69,11 @@ if __name__ == "__main__":
                                    False, "scale" in args.model, args.ego_type)
     logger.info("validation data shape :{}".format(valid_dataset.X.shape))
 
+    input("here")
+
     # X: input, Y: output, poses, egomotions
-    data_idxs = [0, 1, 2, 7]
+    #data_idxs = [0, 1, 2, 7]
+    data_idxs = [0, 1]
     if data_idxs is None:
         logger.info("Invalid argument: model={}".format(args.model))
         exit(1)

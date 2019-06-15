@@ -32,13 +32,14 @@ class CNNBase(chainer.Chain):
         self.std = Variable(cuda.to_gpu(std.astype(np.float32), gpu))
 
     def _prepare_input(self, inputs):
-        pos_x, pos_y, poses, egomotions = inputs[:4]
-        if pos_y.data.ndim == 2:
-            pos_x = F.expand_dims(pos_x, 0)
-            pos_y = F.expand_dims(pos_y, 0)
-            if egomotions is not None:
-                egomotions = F.expand_dims(egomotions, 0)
-            poses = F.expand_dims(poses, 0)
+        #pos_x, pos_y, poses, egomotions = inputs[:4]
+        pos_x, pos_y = inputs[:2]
+        #if pos_y.data.ndim == 2:
+        #    pos_x = F.expand_dims(pos_x, 0)
+        #    pos_y = F.expand_dims(pos_y, 0)
+            #if egomotions is not None:
+            #    egomotions = F.expand_dims(egomotions, 0)
+            #poses = F.expand_dims(poses, 0)
 
         # Locations
         # Note: prediction target is displacement from last input
@@ -46,6 +47,7 @@ class CNNBase(chainer.Chain):
         y = (pos_y - F.broadcast_to(self.mean, pos_y.shape)) / F.broadcast_to(self.std, pos_y.shape)
         y = y - F.broadcast_to(x[:, -1:, :], pos_y.shape)
 
+        '''
         # Egomotions
         past_len = pos_x.shape[1]
         if egomotions is not None:
@@ -61,6 +63,8 @@ class CNNBase(chainer.Chain):
             return x, y, x[:, -1, :], ego_x, ego_y, pose_x, pose_y
         else:
             return x, y, x[:, -1, :], None, None, pose_x, pose_y
+        '''
+        return x, y, x[:, -1, :]
 
     def predict(self, inputs):
         return self.__call__(inputs)
@@ -83,7 +87,8 @@ class CNN(CNNBase):
             self.last = Conv_Module(dc_channel_list[-1], self.nb_inputs, last_list, True)
 
     def __call__(self, inputs):
-        pos_x, pos_y, offset_x, ego_x, ego_y, pose_x, pose_y = self._prepare_input(inputs)
+        #pos_x, pos_y, offset_x, ego_x, ego_y, pose_x, pose_y = self._prepare_input(inputs)
+        pos_x, pos_y, offset_x = self._prepare_input(inputs)
         batch_size, past_len, _ = pos_x.shape
 
         h = self.pos_encoder(pos_x)
@@ -98,7 +103,7 @@ class CNN(CNNBase):
         pred_y = cuda.to_cpu(pred_y.data) * self._std + self._mean
         return loss, pred_y, None
 
-
+'''
 class CNN_Ego(CNNBase):
     """
     Baseline: feeds locations and egomotions
@@ -206,3 +211,4 @@ class CNN_Ego_Pose(CNNBase):
         pred_y = pred_y + F.broadcast_to(F.expand_dims(offset_x, 1), pred_y.shape)
         pred_y = cuda.to_cpu(pred_y.data) * self._std + self._mean
         return loss, pred_y, None
+'''

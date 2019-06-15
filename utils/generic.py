@@ -11,7 +11,8 @@ import argparse
 import numpy as np
 from chainer import serializers
 
-from models.cnn import CNN, CNN_Pose, CNN_Ego, CNN_Ego_Pose
+#from models.cnn import CNN, CNN_Pose, CNN_Ego, CNN_Ego_Pose
+from models.cnn import CNN
 from logging import getLogger
 
 logger = getLogger('main')
@@ -30,7 +31,7 @@ def get_args():
     # Model
     parser.add_argument('--model', type=str, default="cnn")
     parser.add_argument('--input_len', type=int, default=10)
-    parser.add_argument('--offset_len', type=int, default=10)
+    parser.add_argument('--offset_len', type=int, default=10, help = "observe frames")
     parser.add_argument('--pred_len', type=int, default=10)
     parser.add_argument('--inter_list', type=int, nargs="*", default=[])
     parser.add_argument('--last_list', type=int, nargs="*", default=[])
@@ -99,7 +100,9 @@ def get_model(args):
 
 def write_prediction(pred_dict, batch, pred_y):
     for idx, (sample, py) in enumerate(zip(batch, pred_y)):
-        past, ground_truth, pose, vid, frame, pid, flipped, egomotion, scale, mag, size = sample
+        #past, ground_truth, pose, vid, frame, pid, flipped, egomotion, scale, mag, size = sample
+        past, ground_truth, vid, frame, pid, flipped = sample
+
         frame, pid = str(frame), str(pid)
 
         err = np.linalg.norm(py - ground_truth, axis=1)[-1]
