@@ -1,7 +1,10 @@
 # Future Person Localization in First-Person Videos (PyTorch version)
 
 
-# Create datasets 
+# Create datasets  
+Folows steps in original github for downloading datasets
+
+Preprocessing dataset:  
 ```
 python utils/create_dataset.py data/id_test.txt --traj_length 20 --traj_skip 2 --nb_splits 5 --seed 1701 --traj_skip_test 5
 ```
@@ -22,3 +25,9 @@ python -u train_cv.py --root_dir experiments/5fold_proposed_only --in_data datas
 ```
 python train_pytorch.py --root_dir experiments/5fold_proposed_only --in_data dataset/id_test_190614_225910_20_sp5_2_5.joblib --nb_iters 17000 --iter_snapshot 100 --height 960 --batch_size 64 --save_model  --nb_train -1 --pred_len 10 --input_len 10 --nb_splits 5 --eval_split 4 --optimizer Adam
 ```
+
+# To-dos 
+- Finalizing train_pytorch.py with validation module
+- Conver dataset iterators from chainer pytorch. 
+- Compare results with original codes(used Chainer)
+
