@@ -25,7 +25,7 @@ class CNNBase(chainer.Chain):
         self._mean = mean
         self._std = std
         self.nb_inputs = len(mean)
-        self.target_idx = -1
+        #self.target_idx = -1
 
         # Send mean and sd of the dataset to GPU to produce prdiction result in the image coordinate
         self.mean = Variable(cuda.to_gpu(mean.astype(np.float32), gpu))
@@ -95,6 +95,9 @@ class CNN(CNNBase):
         h = self.inter(h)
         h = self.pos_decoder(h)
         pred_y = self.last(h)
+        print(pred_y.shape)
+        print(pos_y.shape)
+        input("here")
         pred_y = F.swapaxes(pred_y, 1, 2)
         pred_y = pred_y[:, :pos_y.shape[1], :]
         loss = F.mean_squared_error(pred_y, pos_y)

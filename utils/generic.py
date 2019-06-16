@@ -47,10 +47,11 @@ def get_args():
     parser.add_argument('--iter_display', type=int, default=100)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--optimizer', type=str, default="adam")
-    parser.add_argument('--lr', type=float, default=0.1)
+    parser.add_argument('--lr', type=float, default=0.0001)
     parser.add_argument('--lr_step_list', type=float, nargs="*", default=[])
     parser.add_argument('--momentum', type=float, default=0.99)
     parser.add_argument('--resume', type=str, default="")
+    parser.add_argument('--grad_clip', type=float, default= 10)
 
     # Others
     parser.add_argument('--gpu', type=int, default=-1)
@@ -62,6 +63,8 @@ def get_args():
     parser.add_argument('--nb_grids', type=int, default=6)
     parser.add_argument('--seed', type=int, default=1701)
     parser.add_argument('--ego_type', type=str, default="sfm")
+
+
 
     return parser.parse_args()
 
@@ -106,6 +109,9 @@ def write_prediction(pred_dict, batch, pred_y):
         frame, pid = str(frame), str(pid)
 
         err = np.linalg.norm(py - ground_truth, axis=1)[-1]
+        traj_type = 0 # added by Manh
+
+        '''
         front_cnt = sum([1 if ps[11][0] - ps[8][0] > 0 else 0 for ps in pose])
         hip_dist = np.mean([np.abs(ps[11, 0] - ps[8, 0]) for ps in pose])
         front_ratio = front_cnt / len(pose)
@@ -119,7 +125,7 @@ def write_prediction(pred_dict, batch, pred_y):
             traj_type = 1
         else:
             traj_type = 3
-
+        '''
         if vid not in pred_dict:
             pred_dict[vid] = {}
         if frame not in pred_dict[vid]:

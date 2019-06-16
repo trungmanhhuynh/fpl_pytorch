@@ -100,6 +100,8 @@ if __name__ == "__main__":
         chainer.config.train = True
         chainer.config.enable_backprop = True
         batch_array = [convert.concat_examples([x[idx] for x in batch], args.gpu) for idx in data_idxs]
+        print("batch_array =", batch_array)
+        input("here")
         model.cleargrads()
         loss, pred_y, _ =model (tuple(map(Variable, batch_array)))
         loss.backward()

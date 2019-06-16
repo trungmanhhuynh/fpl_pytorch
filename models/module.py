@@ -141,6 +141,7 @@ class Decoder(chainer.Chain):
         self.nb_layers = len(channel_list)
         self.no_act_last = no_act_last
         channel_list = channel_list + [nb_inputs]
+
         for idx, (nb_in, nb_out, ksize) in enumerate(zip(channel_list[:-1], channel_list[1:], ksize_list[::-1])):
             self.add_link("deconv{}".format(idx), L.DeconvolutionND(1, nb_in, nb_out, ksize))
             if no_act_last and idx == self.nb_layers - 1:
